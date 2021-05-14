@@ -6,7 +6,7 @@ typedef DragTrashActionBuilder = Widget Function(
 abstract class DragTrashActionDelegate {
   const DragTrashActionDelegate();
 
-  Widget build(BuildContext context, int index, Animation animation);
+  Widget build(BuildContext context, int index, Animation<double> animation);
 
   int get actionCount;
 }
@@ -22,7 +22,7 @@ class DragActionListDelegate extends DragTrashActionDelegate {
   int get actionCount => actions!.length;
 
   @override
-  Widget build(BuildContext context, int index, Animation animation) =>
+  Widget build(BuildContext context, int index, Animation<double> animation) =>
       actions![index];
 }
 
@@ -38,6 +38,41 @@ class _DragTrashScope extends InheritedWidget {
   @override
   bool updateShouldNotify(_DragTrashScope oldWidget) =>
       oldWidget.state != state;
+}
+
+class DraggableTrashData extends InheritedWidget {
+  DraggableTrashData({
+    Key? key,
+    required this.actionAnimation,
+    required this.actionDelegate,
+    required this.draggableTrash,
+    required Widget child,
+  }) : super(key: key, child: child);
+
+  final DragTrashActionDelegate? actionDelegate;
+
+  final Animation<double>? actionAnimation;
+
+  final DraggableTrash draggableTrash;
+
+  int get actionCount => actionDelegate?.actionCount ?? 0;
+
+  static DraggableTrashData? of(BuildContext context) =>
+      context.dependOnInheritedWidgetOfExactType<DraggableTrashData>();
+
+  List<Widget> buildAction(BuildContext context) {
+    return List.generate(
+      actionCount,
+      (index) => actionDelegate!.build(
+        context,
+        index,
+        actionAnimation!,
+      ),
+    );
+  }
+
+  @override
+  bool updateShouldNotify(DraggableTrashData oldWidget) => true;
 }
 
 class DraggableTrash extends StatefulWidget {
@@ -73,7 +108,7 @@ class DraggableTrashState extends State<DraggableTrash>
 
   late Animation<Alignment> _dragAnimation;
 
-  late Animation _trashAnimation;
+  late Animation<double> _trashAnimation;
 
   @override
   void initState() {
@@ -91,13 +126,27 @@ class DraggableTrashState extends State<DraggableTrash>
   @override
   void dispose() {
     super.dispose();
+
+    _dragAnimationController.dispose();
+    _trashAnimationController.dispose();
   }
+
+  DragTrashActionDelegate? get _actionDelegate => widget.actionDelegate;
 
   @override
   Widget build(BuildContext context) {
     return _DragTrashScope(
       state: this,
-      child: Container(),
+      child: DraggableTrashData(
+        draggableTrash: widget,
+        actionAnimation: _trashAnimation,
+        actionDelegate: _actionDelegate,
+        child: Container(
+          height: 200.0,
+          width: 200.0,
+          color: Colors.red,
+        ),
+      ),
     );
   }
 }

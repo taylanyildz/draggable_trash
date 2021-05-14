@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_drag_to_trash/widgets/draggable_trash.dart';
 
 class HomeScreen extends StatefulWidget {
   HomeScreen({
@@ -19,7 +20,19 @@ class _HomeScreenState extends State<HomeScreen> {
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
-          children: [],
+          children: [
+            DraggableTrash.builder(
+              items: [],
+              actionDelegate: DragTrashActionBuilderDelegate(
+                actionCount: 2,
+                builder: (context, index, animation) => Container(
+                  height: 200.0,
+                  width: 200.0,
+                  color: Colors.blue,
+                ),
+              ),
+            ),
+          ],
         ),
       ),
     );
