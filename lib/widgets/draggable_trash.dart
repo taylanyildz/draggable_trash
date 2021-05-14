@@ -65,7 +65,34 @@ class DraggableTrash extends StatefulWidget {
   DraggableTrashState createState() => DraggableTrashState();
 }
 
-class DraggableTrashState extends State<DraggableTrash> {
+class DraggableTrashState extends State<DraggableTrash>
+    with TickerProviderStateMixin {
+  late AnimationController _dragAnimationController;
+
+  late AnimationController _trashAnimationController;
+
+  late Animation<Alignment> _dragAnimation;
+
+  late Animation _trashAnimation;
+
+  @override
+  void initState() {
+    super.initState();
+
+    _dragAnimationController = AnimationController(vsync: this);
+    _trashAnimationController = AnimationController(vsync: this);
+
+    _trashAnimation = CurvedAnimation(
+      parent: _trashAnimationController,
+      curve: Interval(0.0, 1.0, curve: Curves.linear),
+    );
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     return _DragTrashScope(
