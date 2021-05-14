@@ -18,18 +18,25 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
+        child: Stack(
           children: [
             DraggableTrash.builder(
-              items: [],
-              actionDelegate: DragTrashActionBuilderDelegate(
-                actionCount: 2,
-                builder: (context, index, animation) => Container(
+              items: [
+                Container(
                   height: 200.0,
                   width: 200.0,
                   color: Colors.blue,
                 ),
+              ],
+              actionDelegate: DragTrashActionBuilderDelegate(
+                actionCount: 2,
+                builder: (context, index, animation) {
+                  return Container(
+                    height: 200.0,
+                    width: 200.0,
+                    color: Colors.blue,
+                  );
+                },
               ),
             ),
           ],

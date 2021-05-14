@@ -11,6 +11,22 @@ abstract class DragTrashActionDelegate {
   int get actionCount;
 }
 
+class DragTrashActionBuilderDelegate extends DragTrashActionDelegate {
+  const DragTrashActionBuilderDelegate({
+    required this.builder,
+    required this.actionCount,
+  }) : assert(actionCount >= 0);
+
+  @override
+  final int actionCount;
+
+  final DragTrashActionBuilder builder;
+
+  @override
+  Widget build(BuildContext context, int index, Animation<double> animation) =>
+      builder(context, index, animation);
+}
+
 class DragActionListDelegate extends DragTrashActionDelegate {
   const DragActionListDelegate({
     required this.actions,
@@ -60,7 +76,7 @@ class DraggableTrashData extends InheritedWidget {
   static DraggableTrashData? of(BuildContext context) =>
       context.dependOnInheritedWidgetOfExactType<DraggableTrashData>();
 
-  List<Widget> buildAction(BuildContext context) {
+  List<Widget?> buildAction(BuildContext context) {
     return List.generate(
       actionCount,
       (index) => actionDelegate!.build(
@@ -72,7 +88,8 @@ class DraggableTrashData extends InheritedWidget {
   }
 
   @override
-  bool updateShouldNotify(DraggableTrashData oldWidget) => true;
+  bool updateShouldNotify(DraggableTrashData oldWidget) =>
+      oldWidget.actionAnimation != actionAnimation;
 }
 
 class DraggableTrash extends StatefulWidget {
@@ -80,7 +97,9 @@ class DraggableTrash extends StatefulWidget {
     Key? key,
     required List<Widget> actions,
   }) : this.builder(
-            key: key, actionDelegate: DragActionListDelegate(actions: actions));
+          key: key,
+          actionDelegate: DragActionListDelegate(actions: actions),
+        );
 
   DraggableTrash.builder({
     Key? key,
@@ -126,7 +145,6 @@ class DraggableTrashState extends State<DraggableTrash>
   @override
   void dispose() {
     super.dispose();
-
     _dragAnimationController.dispose();
     _trashAnimationController.dispose();
   }
@@ -141,11 +159,7 @@ class DraggableTrashState extends State<DraggableTrash>
         draggableTrash: widget,
         actionAnimation: _trashAnimation,
         actionDelegate: _actionDelegate,
-        child: Container(
-          height: 200.0,
-          width: 200.0,
-          color: Colors.red,
-        ),
+        child: Container(),
       ),
     );
   }
