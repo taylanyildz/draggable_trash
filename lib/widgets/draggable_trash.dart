@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 typedef DragTrashActionBuilder = Widget Function(
-    BuildContext context, int index, Animation animation);
+    BuildContext context, int index, Animation<double> animation);
 
 abstract class DragTrashActionDelegate {
   const DragTrashActionDelegate();
@@ -17,33 +17,33 @@ class DragTrashActionBuilderDelegate extends DragTrashActionDelegate {
     required this.actionCount,
   }) : assert(actionCount >= 0);
 
+  final DragTrashActionBuilder builder;
+
   @override
   final int actionCount;
-
-  final DragTrashActionBuilder builder;
 
   @override
   Widget build(BuildContext context, int index, Animation<double> animation) =>
       builder(context, index, animation);
 }
 
-class DragActionListDelegate extends DragTrashActionDelegate {
-  const DragActionListDelegate({
+class DragTrashActionListDelegate extends DragTrashActionDelegate {
+  const DragTrashActionListDelegate({
     required this.actions,
   });
 
   final List<Widget>? actions;
 
   @override
-  int get actionCount => actions!.length;
+  int get actionCount => actions?.length ?? 0;
 
   @override
-  Widget build(BuildContext context, int index, Animation<double> animation) =>
+  Widget build(BuildContext context, int index, Animation<double> anmation) =>
       actions![index];
 }
 
 class _DragTrashScope extends InheritedWidget {
-  _DragTrashScope({
+  const _DragTrashScope({
     Key? key,
     required Widget child,
     required this.state,
@@ -52,68 +52,81 @@ class _DragTrashScope extends InheritedWidget {
   final DraggableTrashState state;
 
   @override
-  bool updateShouldNotify(_DragTrashScope oldWidget) =>
-      oldWidget.state != state;
+  bool updateShouldNotify(covariant InheritedWidget oldWidget) =>
+      (oldWidget as _DragTrashScope).state != state;
 }
 
 class DraggableTrashData extends InheritedWidget {
   DraggableTrashData({
     Key? key,
-    required this.actionAnimation,
     required this.actionDelegate,
+    required this.alignment,
     required this.draggableTrash,
+    required this.removeAnimation,
     required Widget child,
   }) : super(key: key, child: child);
 
   final DragTrashActionDelegate? actionDelegate;
 
-  final Animation<double>? actionAnimation;
+  final Animation<double> removeAnimation;
 
   final DraggableTrash draggableTrash;
 
+  final Alignment alignment;
+
   int get actionCount => actionDelegate?.actionCount ?? 0;
 
-  static DraggableTrashData? of(BuildContext context) =>
-      context.dependOnInheritedWidgetOfExactType<DraggableTrashData>();
-
-  List<Widget?> buildAction(BuildContext context) {
+  List<Widget> buildActions(BuildContext context) {
     return List.generate(
       actionCount,
       (index) => actionDelegate!.build(
         context,
         index,
-        actionAnimation!,
+        removeAnimation,
       ),
     );
   }
 
   @override
   bool updateShouldNotify(DraggableTrashData oldWidget) =>
-      oldWidget.actionAnimation != actionAnimation;
+      oldWidget.actionDelegate != actionDelegate ||
+      oldWidget.draggableTrash != draggableTrash ||
+      oldWidget.alignment != alignment ||
+      oldWidget.removeAnimation != removeAnimation;
+
+  static DraggableTrashData? of(BuildContext context) =>
+      context.dependOnInheritedWidgetOfExactType<DraggableTrashData>();
 }
 
 class DraggableTrash extends StatefulWidget {
   DraggableTrash({
     Key? key,
-    required List<Widget> actions,
+    required Alignment alignment,
+    List<Widget>? actions,
   }) : this.builder(
           key: key,
-          actionDelegate: DragActionListDelegate(actions: actions),
+          alignment: alignment,
+          actionDelegate: DragTrashActionListDelegate(actions: actions),
         );
 
   DraggableTrash.builder({
     Key? key,
-    required this.actionDelegate,
-    this.items,
+    required this.alignment,
+    this.actionDelegate,
+    this.actions,
   }) : super(key: key);
 
-  final List<Widget>? items;
+  final Alignment alignment;
 
-  final DragTrashActionDelegate actionDelegate;
+  final DragTrashActionDelegate? actionDelegate;
 
-  ///
-  static DraggableTrashState? of(BuildContext context) =>
-      context.dependOnInheritedWidgetOfExactType<_DragTrashScope>()!.state;
+  final List<Widget>? actions;
+
+  static DraggableTrashState? of(BuildContext context) {
+    final _DragTrashScope? scope =
+        context.dependOnInheritedWidgetOfExactType<_DragTrashScope>();
+    return scope?.state;
+  }
 
   @override
   DraggableTrashState createState() => DraggableTrashState();
@@ -121,33 +134,47 @@ class DraggableTrash extends StatefulWidget {
 
 class DraggableTrashState extends State<DraggableTrash>
     with TickerProviderStateMixin {
-  late AnimationController _dragAnimationController;
-
-  late AnimationController _trashAnimationController;
-
-  late Animation<Alignment> _dragAnimation;
-
-  late Animation<double> _trashAnimation;
-
   @override
   void initState() {
     super.initState();
-
-    _dragAnimationController = AnimationController(vsync: this);
-    _trashAnimationController = AnimationController(vsync: this);
-
-    _trashAnimation = CurvedAnimation(
-      parent: _trashAnimationController,
-      curve: Interval(0.0, 1.0, curve: Curves.linear),
-    );
+    _dragAlignment = widget.alignment;
+    _moveController = AnimationController(vsync: this);
   }
 
-  @override
-  void dispose() {
-    super.dispose();
-    _dragAnimationController.dispose();
-    _trashAnimationController.dispose();
+  late final _dragAlignment;
+
+  late final AnimationController _moveController;
+
+  late final Animation<Alignment> _springAnimation;
+
+  late final Animation<double> _removeAnimation;
+
+  void handlePositionChange(detail, int index, Size size) {
+    switch (detail.runtimeType) {
+      case DragUpdateDetails:
+        _changePositon(detail, index, size);
+        break;
+      case DragDownDetails:
+        _checkDraggableTrash(detail, index, size);
+        break;
+      case DragEndDetails:
+        _endDraggable();
+        break;
+    }
   }
+
+  void _changePositon(DragUpdateDetails detail, int index, Size size) {
+    setState(() {
+      _dragAlignment += Alignment(
+        detail.delta.dx / (size.width / 2),
+        detail.delta.dy / (size.height / 2),
+      );
+    });
+  }
+
+  void _checkDraggableTrash(DragDownDetails detail, int index, Size size) {}
+
+  void _endDraggable() {}
 
   DragTrashActionDelegate? get _actionDelegate => widget.actionDelegate;
 
@@ -157,8 +184,9 @@ class DraggableTrashState extends State<DraggableTrash>
       state: this,
       child: DraggableTrashData(
         draggableTrash: widget,
-        actionAnimation: _trashAnimation,
         actionDelegate: _actionDelegate,
+        alignment: _dragAlignment,
+        removeAnimation: _removeAnimation,
         child: Container(),
       ),
     );

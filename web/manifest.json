@@ -1,6 +1,6 @@
 {
-    "name": "flutter_drag_to_trash",
-    "short_name": "flutter_drag_to_trash",
+    "name": "draggable_trash",
+    "short_name": "draggable_trash",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",

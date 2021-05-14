@@ -1,4 +1,4 @@
-package com.example.flutter_drag_to_trash
+package com.example.draggable_trash
 
 import io.flutter.embedding.android.FlutterActivity
 

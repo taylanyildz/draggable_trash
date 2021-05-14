@@ -6,29 +6,6 @@ Just move the items you want to delete onto the trash can, now they've been dele
 
 Not yet ready!.
 
-
-```dart
-DraggableTrash.builder(
-    items: [
-    Container(
-        height: 200.0,
-        width: 200.0,
-        color: Colors.blue,
-      ),
-    ],
-    actionDelegate: DragTrashActionBuilderDelegate(
-    actionCount: 2,
-    builder: (context, index, animation) {
-        return Container(
-        height: 200.0,
-        width: 200.0,
-        color: Colors.blue,
-        );
-    },
-  ),
-),
-```
-
 ## Getting Started
 
 This project is a starting point for a Flutter application.
