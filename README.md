@@ -2,8 +2,6 @@
 
 Just move the items you want to delete onto the trash can, now they've been deleted.
 
-
-
 Not yet ready!.
 
 ## Getting Started

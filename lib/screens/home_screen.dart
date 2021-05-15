@@ -1,5 +1,3 @@
-import 'package:draggable_trash/widgets/draggable_trash_action_pane.dart';
-import 'package:draggable_trash/widgets/widgets.dart';
 import 'package:flutter/material.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -9,6 +7,7 @@ class HomeScreen extends StatefulWidget {
   }) : super(key: key);
 
   final String? title;
+
   @override
   _HomeScreenState createState() => _HomeScreenState();
 }
@@ -18,26 +17,9 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: Center(
-        child: Stack(
-          children: [
-            DraggableTrash.builder(
-              alignment: Alignment.center,
-              child: Container(
-                height: 200.0,
-                width: 200.0,
-                color: Colors.red,
-              ),
-              actionPane: DraggableActionPane(),
-              actionDelegate: DragTrashActionBuilderDelegate(
-                actionCount: 2,
-                builder: (contet, index, animation) => Container(
-                  width: 100.0,
-                  height: 100.0,
-                  color: Colors.blue,
-                ),
-              ),
-            )
-          ],
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [],
         ),
       ),
     );

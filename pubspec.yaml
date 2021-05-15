@@ -1,9 +1,9 @@
 name: draggable_trash
 description: Just move the items you want to delete onto the trash can, now they've been deleted.
+version: 1.0.0+1
 homepage: https://github.com/taylanyildz/draggable_trash
 
 publish_to: 'none'
-version: 1.0.0+1
 
 environment:
   sdk: '>=2.12.0 <3.0.0'
@@ -21,3 +21,8 @@ dev_dependencies:
 
 flutter:
   uses-material-design: true
+
+  fonts:
+     - family: Rubik
+       fonts:
+         - asset: assets\icons\ic_trash.ttf
