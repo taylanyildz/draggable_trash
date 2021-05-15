@@ -23,6 +23,6 @@ flutter:
   uses-material-design: true
 
   fonts:
-     - family: Rubik
+     - family: Trash
        fonts:
          - asset: assets\icons\ic_trash.ttf

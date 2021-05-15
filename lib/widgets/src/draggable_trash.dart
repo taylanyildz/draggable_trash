@@ -1,3 +1,4 @@
+import 'package:draggable_trash/widgets/draggable_to_trash.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/physics.dart';
 
@@ -67,7 +68,6 @@ class DraggableTrashData extends InheritedWidget {
     required this.draggableTrash,
     required this.changeAnimation,
     required this.dismissAnimation,
-    required this.dragAnimation,
     required Widget child,
   }) : super(key: key, child: child);
 
@@ -83,8 +83,6 @@ class DraggableTrashData extends InheritedWidget {
 
   final Animation<double> changeAnimation;
 
-  final Animation<Alignment> dragAnimation;
-
   int get actionCount => actionDelagate?.actionCount ?? 0;
 
   Alignment get currentAlignment => alignment;
@@ -99,7 +97,6 @@ class DraggableTrashData extends InheritedWidget {
       oldWidget.actionDelagate != actionDelagate ||
       oldWidget.alignment != alignment ||
       oldWidget.changeAnimation != changeAnimation ||
-      oldWidget.dragAnimation != dragAnimation ||
       oldWidget.dismissAnimation != dismissAnimation ||
       oldWidget.draggableTrash != draggableTrash;
 }
@@ -156,8 +153,22 @@ class _DraggableTrashState extends State<DraggableTrash>
       duration: Duration(seconds: 1),
     );
 
+    _changableAnimation =
+        CurvedAnimation(parent: _draggableController, curve: Curves.linear);
+
+    _dismissibleController.addListener(() {
+      setState(() {
+        _trashSize = _changableAnimation.value;
+      });
+    });
+
+    _dismissibleAnimation =
+        CurvedAnimation(parent: _draggableController, curve: Curves.linear);
+
     _draggableController.addListener(() {
-      setState(() {});
+      setState(() {
+        //_dragAlignment = _draggableAnimation.value;
+      });
     });
   }
 
@@ -170,6 +181,10 @@ class _DraggableTrashState extends State<DraggableTrash>
 
   late Alignment _dragAlignment;
   late Alignment _trashAlignment;
+
+  late Alignment _endAlignment;
+
+  late double _trashSize = 8.0;
 
   @override
   void dispose() {
@@ -191,21 +206,46 @@ class _DraggableTrashState extends State<DraggableTrash>
       case DragEndDetails:
         _checkPosition(detail, size);
         break;
-      default:
-        break;
     }
   }
 
-  void _changePosition(DragUpdateDetails detail, Size size) {}
+  void _changePosition(DragUpdateDetails detail, Size size) {
+    print(_dragAlignment);
+
+    setState(() {
+      if (_dragAlignment.x > 0.5) {
+        if (_trashSize < 15.0) {
+          _trashSize = _trashSize + _dragAlignment.x;
+        }
+      }
+      if (_dragAlignment.x < 0.5 && _dragAlignment.x > 0) {
+        if (_trashSize > 8.0) {
+          _trashSize = _trashSize - _dragAlignment.x;
+        }
+      }
+      _dragAlignment += Alignment(
+        detail.delta.dx / (size.width / 3),
+        detail.delta.dy / (size.height / 3),
+      );
+    });
+  }
 
   void _checkPosition(DragEndDetails detail, Size size) {
     final pixelsPerSecond = detail.velocity.pixelsPerSecond;
+
     _draggableAnimation = _draggableController.drive(
       AlignmentTween(
         begin: _dragAlignment,
-        end: Alignment.center,
+        end: Alignment(4, 0),
       ),
     );
+    _changableAnimation = _dismissibleController.drive(
+      Tween<double>(
+        begin: _trashSize,
+        end: 8.0,
+      ),
+    );
+
     final unitsPerSecondX = pixelsPerSecond.dx / size.width;
     final unitsPerSecondY = pixelsPerSecond.dy / size.height;
     final unitsPerSecond = Offset(unitsPerSecondX, unitsPerSecondY);
@@ -220,22 +260,44 @@ class _DraggableTrashState extends State<DraggableTrash>
     final simulation = SpringSimulation(spring, 0, 1, -unitVelocity);
 
     _draggableController.animateWith(simulation);
+    _dismissibleController.animateWith(simulation);
   }
 
   @override
   Widget build(BuildContext context) {
-    return _DraggableScope(
-      state: this,
-      child: DraggableTrashData(
-        draggableTrash: widget,
-        alignment: _dragAlignment,
-        actionDelagate: _actionDelagate,
-        dismissible: false,
-        dragAnimation: _draggableAnimation,
-        changeAnimation: _changableAnimation,
-        dismissAnimation: _dismissibleAnimation,
-        child: Container(),
-      ),
+    return Stack(
+      children: [
+        _DraggableScope(
+          state: this,
+          child: DraggableTrashData(
+            draggableTrash: widget,
+            alignment: _dragAlignment,
+            actionDelagate: _actionDelagate,
+            dismissible: false,
+            changeAnimation: _changableAnimation,
+            dismissAnimation: _dismissibleAnimation,
+            child: PageDragAction(
+              draggable: true,
+              alignment: _dragAlignment,
+              index: 0,
+              child: Container(
+                height: 200.0,
+                width: 200.0,
+                color: Colors.red,
+              ),
+            ),
+          ),
+        ),
+        Positioned(
+          right: 30.0,
+          bottom: 30.0,
+          child: TrashAction(
+            dragSize: _trashSize,
+            animation: _changableAnimation,
+            alignment: _trashAlignment,
+          ),
+        )
+      ],
     );
   }
 }

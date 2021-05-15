@@ -1,3 +1,4 @@
+import 'package:draggable_trash/widgets/draggable_to_trash.dart';
 import 'package:flutter/material.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -16,11 +17,19 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [],
-        ),
+      body: Stack(
+        children: [
+          DraggableTrash(
+            trashAlignment: Alignment.bottomRight,
+            pageAlignment: Alignment.center,
+            actions: [
+              Container(
+                height: 200.0,
+                width: 200.0,
+              ),
+            ],
+          ),
+        ],
       ),
     );
   }

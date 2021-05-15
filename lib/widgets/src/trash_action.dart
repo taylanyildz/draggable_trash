@@ -3,10 +3,11 @@ import 'package:flutter/material.dart';
 
 const _cAlignment = Alignment.bottomLeft;
 
-class TrashAction extends AnimatedWidget {
+class TrashAction extends StatelessWidget {
   TrashAction({
     Key? key,
     required Animation<double> animation,
+    required this.dragSize,
     this.iconData,
     this.alignment = _cAlignment,
     this.foregroundColor,
@@ -15,7 +16,7 @@ class TrashAction extends AnimatedWidget {
           begin: 1.0,
           end: 1.2,
         ).animate(animation),
-        super(key: key, listenable: animation);
+        super(key: key);
 
   final Animation<double> animation;
 
@@ -27,19 +28,22 @@ class TrashAction extends AnimatedWidget {
 
   final Color? backgroundColor;
 
+  final double? dragSize;
+
   @override
   Widget build(BuildContext context) {
-    return Transform.scale(
-      scale: animation.value,
-      child: Container(
-        decoration: BoxDecoration(
-          shape: BoxShape.circle,
-          color: backgroundColor ?? Colors.red,
-        ),
-        child: Icon(
-          iconData ?? CustomIcon.ic_trash,
-          color: foregroundColor ?? Colors.white,
-        ),
+    return AnimatedContainer(
+      alignment: Alignment.center,
+      padding: EdgeInsets.all(dragSize ?? 8.0),
+      duration: Duration(milliseconds: 100),
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        color: backgroundColor ?? Colors.green,
+      ),
+      child: Icon(
+        iconData ?? CustomIcon.ic_trash,
+        color: foregroundColor ?? Colors.white,
+        size: 30.0,
       ),
     );
   }
