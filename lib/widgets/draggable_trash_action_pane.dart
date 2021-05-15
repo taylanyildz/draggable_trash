@@ -1,5 +1,7 @@
 import 'package:draggable_trash/widgets/draggable_trash.dart';
+import 'package:draggable_trash/widgets/widgets.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
 
 class _DraggableTrashActionPane extends StatelessWidget {
   _DraggableTrashActionPane({
@@ -17,37 +19,31 @@ class _DraggableTrashActionPane extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    if (data.removeAnimation.isDismissed) {
+      return data.draggableTrash.child;
+    }
     return Stack(
       children: [
         child,
-        data.draggableTrash.child,
+        DragTrasAction(
+          alignment: data.alignment,
+          child: data.draggableTrash.child,
+        ),
       ],
     );
   }
 }
 
-class DraggableTrashActionPane extends StatelessWidget {
+class DraggableActionPane extends StatelessWidget {
+  const DraggableActionPane({Key? key}) : super(key: key);
   @override
   Widget build(BuildContext context) {
     final DraggableTrashData data = DraggableTrashData.of(context)!;
-    final animation = Tween<double>(
-      begin: 0,
-      end: 1,
-    ).animate(data.removeAnimation);
     return _DraggableTrashActionPane(
       data: data,
-      child: AnimatedBuilder(
-        animation: animation,
-        builder: (context, child) {
-          return Stack(
-            children: data
-                .buildActions(context)
-                .map(
-                  (e) => Expanded(child: e),
-                )
-                .toList(),
-          );
-        },
+      child: Flex(
+        direction: Axis.horizontal,
+        children: data.buildActions(context).map((e) => e).toList(),
       ),
     );
   }

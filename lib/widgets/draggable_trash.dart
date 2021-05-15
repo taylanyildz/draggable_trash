@@ -164,13 +164,13 @@ class DraggableTrashState extends State<DraggableTrash>
 
   late final Animation<double> _removeAnimation;
 
-  void handlePositionChange(detail, int index, Size size) {
+  void handlePositionChange(detail, Size size) {
     switch (detail.runtimeType) {
       case DragUpdateDetails:
-        _changePositon(detail, index, size);
+        _changePositon(detail, size);
         break;
       case DragDownDetails:
-        _checkDraggableTrash(detail, index, size);
+        _checkDraggableTrash(detail, size);
         break;
       case DragEndDetails:
         _endDraggable();
@@ -178,7 +178,7 @@ class DraggableTrashState extends State<DraggableTrash>
     }
   }
 
-  void _changePositon(DragUpdateDetails detail, int index, Size size) {
+  void _changePositon(DragUpdateDetails detail, Size size) {
     setState(() {
       _dragAlignment += Alignment(
         detail.delta.dx / (size.width / 2),
@@ -187,7 +187,7 @@ class DraggableTrashState extends State<DraggableTrash>
     });
   }
 
-  void _checkDraggableTrash(DragDownDetails detail, int index, Size size) {}
+  void _checkDraggableTrash(DragDownDetails detail, Size size) {}
 
   void _endDraggable() {}
 
@@ -196,13 +196,7 @@ class DraggableTrashState extends State<DraggableTrash>
   @override
   Widget build(BuildContext context) {
     print(_actionDelegate!.actionCount);
-    Widget? content = widget.child;
 
-    content = DragTrasAction(
-      child: widget.child,
-      index: 0,
-      alignment: _dragAlignment,
-    );
     return _DragTrashScope(
       state: this,
       child: DraggableTrashData(
@@ -210,7 +204,7 @@ class DraggableTrashState extends State<DraggableTrash>
         actionDelegate: _actionDelegate,
         alignment: _dragAlignment,
         removeAnimation: _removeAnimation,
-        child: content,
+        child: widget.actionPane,
       ),
     );
   }

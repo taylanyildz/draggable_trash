@@ -5,13 +5,10 @@ import 'package:flutter/material.dart';
 abstract class RemovableTrasAction extends StatelessWidget {
   RemovableTrasAction({
     Key? key,
-    required this.index,
   }) : super(key: key);
 
-  final int index;
-
   void _handleRemovable(detail, BuildContext context, Size size) {
-    DraggableTrash.of(context)?.handlePositionChange(detail, index, size);
+    DraggableTrash.of(context)?.handlePositionChange(detail, size);
   }
 
   @override
@@ -33,13 +30,10 @@ class DragTrasAction extends RemovableTrasAction {
   DragTrasAction({
     Key? key,
     required this.child,
-    required this.index,
     required this.alignment,
-  }) : super(key: key, index: index);
+  }) : super(key: key);
 
   final Widget child;
-
-  final int index;
 
   final Alignment alignment;
 

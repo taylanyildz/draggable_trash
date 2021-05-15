@@ -27,21 +27,15 @@ class _HomeScreenState extends State<HomeScreen> {
                 width: 200.0,
                 color: Colors.red,
               ),
-              actionPane: DraggableTrashActionPane(),
+              actionPane: DraggableActionPane(),
               actionDelegate: DragTrashActionBuilderDelegate(
-                  actionCount: 1,
-                  builder: (context, index, animation) {
-                    print('index : $index');
-                    return DragTrasAction(
-                      alignment: Alignment.center,
-                      child: Container(
-                        width: 400.0,
-                        height: 400.0,
-                        color: Colors.black,
-                      ),
-                      index: index,
-                    );
-                  }),
+                actionCount: 2,
+                builder: (contet, index, animation) => Container(
+                  width: 100.0,
+                  height: 100.0,
+                  color: Colors.blue,
+                ),
+              ),
             )
           ],
         ),

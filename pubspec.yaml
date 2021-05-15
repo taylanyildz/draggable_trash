@@ -1,8 +1,8 @@
 name: draggable_trash
-description: A new Flutter project.
+description: Just move the items you want to delete onto the trash can, now they've been deleted.
+homepage: https://github.com/taylanyildz/draggable_trash
 
 publish_to: 'none'
-
 version: 1.0.0+1
 
 environment:
@@ -15,9 +15,9 @@ dependencies:
   cupertino_icons: ^1.0.2
 
 dev_dependencies:
+
   flutter_test:
     sdk: flutter
 
 flutter:
-
   uses-material-design: true
