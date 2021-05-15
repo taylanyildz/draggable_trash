@@ -1,3 +1,4 @@
+import 'package:draggable_trash/widgets/draggable_action.dart';
 import 'package:flutter/material.dart';
 
 typedef DragTrashActionBuilder = Widget Function(
@@ -101,10 +102,14 @@ class DraggableTrashData extends InheritedWidget {
 class DraggableTrash extends StatefulWidget {
   DraggableTrash({
     Key? key,
+    required Widget child,
+    required Widget actionPane,
     required Alignment alignment,
     List<Widget>? actions,
   }) : this.builder(
           key: key,
+          child: child,
+          actionPane: actionPane,
           alignment: alignment,
           actionDelegate: DragTrashActionListDelegate(actions: actions),
         );
@@ -112,6 +117,8 @@ class DraggableTrash extends StatefulWidget {
   DraggableTrash.builder({
     Key? key,
     required this.alignment,
+    required this.child,
+    required this.actionPane,
     this.actionDelegate,
     this.actions,
   }) : super(key: key);
@@ -121,6 +128,10 @@ class DraggableTrash extends StatefulWidget {
   final DragTrashActionDelegate? actionDelegate;
 
   final List<Widget>? actions;
+
+  final Widget child;
+
+  final Widget actionPane;
 
   static DraggableTrashState? of(BuildContext context) {
     final _DragTrashScope? scope =
@@ -138,11 +149,15 @@ class DraggableTrashState extends State<DraggableTrash>
   void initState() {
     super.initState();
     _dragAlignment = widget.alignment;
+
     _moveController = AnimationController(vsync: this);
+    _removeAnimation = Tween<double>(
+      begin: 0.0,
+      end: 1.0,
+    ).animate(_moveController);
   }
 
-  late final _dragAlignment;
-
+  late Alignment _dragAlignment;
   late final AnimationController _moveController;
 
   late final Animation<Alignment> _springAnimation;
@@ -180,6 +195,14 @@ class DraggableTrashState extends State<DraggableTrash>
 
   @override
   Widget build(BuildContext context) {
+    print(_actionDelegate!.actionCount);
+    Widget? content = widget.child;
+
+    content = DragTrasAction(
+      child: widget.child,
+      index: 0,
+      alignment: _dragAlignment,
+    );
     return _DragTrashScope(
       state: this,
       child: DraggableTrashData(
@@ -187,7 +210,7 @@ class DraggableTrashState extends State<DraggableTrash>
         actionDelegate: _actionDelegate,
         alignment: _dragAlignment,
         removeAnimation: _removeAnimation,
-        child: Container(),
+        child: content,
       ),
     );
   }
